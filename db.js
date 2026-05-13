@@ -2,9 +2,9 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'password',
+  host: process.env.DB_HOST || '172.31.10.10',
+  user: process.env.DB_USER || 'db_user',
+  password: process.env.DB_PASSWORD || 'QWFsausb4163',
   database: process.env.DB_NAME || 'fullstack_db',
   port: process.env.DB_PORT || 3306,
   waitForConnections: true,
