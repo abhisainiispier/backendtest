@@ -3,15 +3,26 @@ require('dotenv').config();
 
 async function setupDatabase() {
   try {
+    // Validate required environment variables
+    const requiredEnvVars = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME', 'DB_PORT'];
+    const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+    if (missingEnvVars.length > 0) {
+      console.error('\n✗ ERROR: Missing required environment variables:');
+      missingEnvVars.forEach(envVar => console.error(`  - ${envVar}`));
+      console.error('\nPlease add these to your .env file');
+      process.exit(1);
+    }
+
     // Connect without specifying database first
     const connection = await mysql.createConnection({
-      host: process.env.DB_HOST || 'localhost',
-      user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || 'password',
-      port: process.env.DB_PORT || 3306,
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      port: process.env.DB_PORT,
     });
 
-    const dbName = process.env.DB_NAME || 'fullstack_db';
+    const dbName = process.env.DB_NAME;
 
     // Create database
     await connection.query(`CREATE DATABASE IF NOT EXISTS ${dbName}`);

@@ -1,10 +1,22 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+
+// Validate required environment variables
+const requiredEnvVars = ['API_PORT'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('\n✗ ERROR: Missing required environment variables:');
+  missingEnvVars.forEach(envVar => console.error(`  - ${envVar}`));
+  console.error('\nPlease add these to your .env file');
+  process.exit(1);
+}
+
 const pool = require('./db');
 
 const app = express();
-const PORT = process.env.API_PORT || 5000;
+const PORT = process.env.API_PORT;
 
 // Middleware
 app.use(cors());
