@@ -1,4 +1,6 @@
+# =========================
 # Build stage
+# =========================
 FROM node:18-alpine as builder
 
 WORKDIR /app
@@ -9,13 +11,15 @@ COPY package.json package-lock.json* ./
 # Install dependencies
 RUN npm install
 
-# Copy all source
+# Copy all source files
 COPY . .
 
-# (Optional) Build step if you have TypeScript or need to bundle
-# For now, we'll just copy the files as-is
+# Copy .env file
+COPY .env .env
 
+# =========================
 # Production stage
+# =========================
 FROM node:18-alpine
 
 WORKDIR /app
@@ -34,8 +38,16 @@ COPY --from=builder /app/server.js ./
 COPY --from=builder /app/db.js ./
 COPY --from=builder /app/setup-db.js ./
 
+# Copy node_modules from builder
+COPY --from=builder /app/node_modules ./node_modules
+
+# Copy .env file inside container
+COPY --from=builder /app/.env ./.env
+
 # Copy entrypoint script
-COPY entrypoint.sh ./
+COPY --from=builder /app/entrypoint.sh ./
+
+# Give execute permission
 RUN chmod +x ./entrypoint.sh
 
 # Expose port
@@ -43,7 +55,7 @@ EXPOSE 5000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:5000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+    CMD node -e "require('http').get('http://localhost:5000/api/health', (r) => { if (r.statusCode !== 200) throw new Error(r.statusCode) })"
 
-# Start the application with entrypoint
+# Start application
 CMD ["./entrypoint.sh"]
